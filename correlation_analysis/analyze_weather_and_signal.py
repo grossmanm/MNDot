@@ -20,7 +20,7 @@ output_dir = args.output_dir
 
 hourly = 1
 if not weather_data_file:
-    weather_data_file = os.path.join(os.path.dirname(os.getcwd()), 'data/weather_data/hourly/Little Canada 8_9_hourly.csv')
+    weather_data_file = os.path.join(os.path.dirname(os.getcwd()), 'data/weather_data/hourly/Little Canada_8_9_hourly.csv')
 if not traffic_data_dir:
     traffic_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/traffic/hourly/')
 if not output_dir:
@@ -86,9 +86,9 @@ def analyze_data(file_name1):
     street_id = file_name1.split('_')[0]
     time_span = file_name1.split('_')[1] + '_' + file_name1.split('_')[2]
 
-    id2street = {'51': 0, '210': 1, '1039': 2}
+    id2street = {'51': '65_81st', '210': '51_crc2', '1039': '694_eriver_nramp', '1041':'694_eriver_nramp'}
 
-    columns = ['65_81st', '51_crc2', '694_eriver_nramp', 'VISIBLITY', 'HUMIDITY', 'PRECIP TYPE',
+    columns = ['VISIBLITY', 'HUMIDITY', 'PRECIP TYPE',
                                        'PRECIP RATE', 'WIND DIR', 'WIND SPEED',
                                        'AIR TEMP', 'MIN TEMP', 'MAX TEMP', 'WET BULB TEMP',
                                         'DEW POINT', 'SURFACE TEMP', 'SUBSURFACE TEMP',
@@ -102,8 +102,8 @@ def analyze_data(file_name1):
     # detection2 = get_data(dir + file_name2)
     # detection3 = get_data(dir + file_name3)
 
-    res = pd.DataFrame(columns=['Date'] + columns[3:])
-    for i in range(3, len(columns)):
+    res = pd.DataFrame(columns=['Date'] + columns)
+    for i in range(len(columns)):
     # for i in [15]:
         metric = df[columns[i]].to_numpy()
         # detection1[20:20+valid_len]
@@ -114,8 +114,7 @@ def analyze_data(file_name1):
         # valid_len = min(len(detection1), len(detection2), len(detection3))
         valid_len = min(len(metric), len(detection1))
         np_data = np.array([detection1[:valid_len], metric[:valid_len]]).transpose()
-
-        data = pd.DataFrame(np_data, columns=[columns[id2street[street_id]], columns[i]])
+        data = pd.DataFrame(np_data, columns=[id2street[street_id], columns[i]])
 
         df_max_scaled = data.copy()
 
@@ -173,7 +172,7 @@ def analyze_data(file_name1):
             v5.append(filled_value)
 
 
-        plot_loc_corr(v1, columns[id2street[street_id]], v3, columns[i], v5)
+        #plot_loc_corr(v1, columns[id2street[street_id]], v3, columns[i], v5, )
 
         start_date = datetime(2023, 8, 1)
         delta = timedelta(hours=1)
@@ -186,8 +185,8 @@ def analyze_data(file_name1):
             delta_time = delta * (a + input_size)
             date.append(str(start_date + delta_time) )
             record.append(transfered_prob[a])
-            print(str(start_date + delta_time) +
-                  ', ' + str(transfered_prob[a]))
+            #print(str(start_date + delta_time) +
+            #      ', ' + str(transfered_prob[a]))
         if i == 3:
             res['Date'] = date
 
@@ -196,7 +195,7 @@ def analyze_data(file_name1):
         local_corr_map_high[columns[i]] = np.mean(sorted(score0)[cut:])
         local_corr_map_low[columns[i]] = np.mean(sorted(score0)[:cut])
 
-    print('Intersaction: ' + columns[id2street[street_id]])
+    print('Intersection: ' + id2street[street_id])
     print('Time span: ' + time_span)
     # print(local_corr_map_high)
     # print(local_corr_map_low)
@@ -205,7 +204,7 @@ def analyze_data(file_name1):
         ratio[key] = local_corr_map_high[key] / local_corr_map_low[key]
 
     sorted_ratio = sorted(ratio.items(), key=lambda x:x[1])
-    print(sorted_ratio)
+    #print(sorted_ratio)
     columns_to_drop = []
     for x in range(-1, -4, -1):
         columns_to_drop.append(sorted_ratio[x][0])
@@ -213,7 +212,8 @@ def analyze_data(file_name1):
     columns_to_drop.append('SURFACE STATUS')
     res.drop(columns=columns_to_drop, inplace=True)
 
-    to_file = os.path.join(output_dir,'local_correlation_' + columns[2] + '.csv')
+    to_file = os.path.join(output_dir,'local_correlation_' + id2street[street_id] + '.csv')
+    print(to_file)
     res.to_csv(to_file, index=None)
 
 for file in traffic_data_files:
