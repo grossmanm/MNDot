@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import argparse
 from moviepy.editor import VideoFileClip
+from select_camera import camera_to_use
 
 # params for ShiTomasi corner detection
 feature_params = dict( maxCorners = 100,
@@ -25,7 +26,7 @@ occlusion_max = 350
 min_video_dur = 30
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--video_locations', type=str, help='File containing malfunctions and video locations')
+parser.add_argument('--malfunction_file', type=str, help='File containing malfunctions and video locations')
 parser.add_argument('--snapshot_dir', type=str, help='Directory where snapshot files will be saved')
 parser.add_argument('--video_dir', type=str, help='Location of videos to be read')
 parser.add_argument('--output_dir', type=str, help='Where to write the output')
@@ -33,7 +34,7 @@ parser.add_argument('--output_dir', type=str, help='Where to write the output')
 
 args = parser.parse_args()
 
-malfunction_file = args.video_locations
+malfunction_file = args.malfunction_file
 snapshot_file_dir = args.snapshot_dir
 video_dir = args.video_dir
 output_dir = args.output_dir
@@ -61,107 +62,6 @@ weekend_threshold_map = [0.0132, 0.0084, 0.0065, 0.0052, 0.0059, 0.0099,
                          0.0168, 0.0247, 0.0369, 0.0522, 0.0660, 0.0739,
                          0.0779, 0.0777, 0.0778, 0.0772, 0.0750, 0.0691,
                          0.0602, 0.0492, 0.0399, 0.0329, 0.0254, 0.0169]
-
-def camera_to_use(camera_name):
-    # some locations do not have the maximum of 4 camera views and only use 2 or 3.
-    # Others are fisheye lenses and cannot be split into quadrants like the others
-    split = True
-    use_tr = True
-    use_tl = True
-    use_br = True
-    use_bl = True
-    if camera_name=='65_81st_Vision_Stream1':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = True
-        use_bl = True
-    elif camera_name=='694_eriver_nramp_vision':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = True
-        use_bl = True
-    elif camera_name=='36_whitebear_nramp_iteris':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = False
-        use_bl = True
-    elif camera_name=='36_whitebear_sramp_iteris':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = False
-        use_bl = True
-    elif camera_name=='65_Blake_Vision_Stream1':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = True
-        use_bl = True
-    elif camera_name=='35e_cliff_eramp_iteris':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = False
-        use_bl = True
-    elif camera_name=='35e_cliff_wramp_iteris':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = False
-        use_bl = True
-    elif camera_name=='s_cr144_rogershighscool_vision':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = True
-        use_bl = True
-    elif camera_name == '62_france_sramp_vision':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = False
-        use_bl = True
-    elif camera_name == '62_france_nramp_vision':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = False
-        use_bl = True
-    elif camera_name == '77_cliff_wramp_vision':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = False
-        use_bl = True
-    elif camera_name == 'CR81_deere_visions_stream':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = True
-        use_bl = True
-    elif camera_name == 'CR81_industrial_visions_stream':
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = True
-        use_bl = True
-    elif 'gridsmart' in camera_name:
-        split = False
-        use_tr = False
-        use_tl = False
-        use_br = False
-        use_bl= False
-    else:
-        split = True
-        use_tr = True
-        use_tl = True
-        use_br = True
-        use_bl = True
-    return split, use_tr, use_tl, use_br, use_bl
-    
     
 malfunction_df = pd.read_csv(malfunction_file)
 out_dict = {'malfunction_id':[], 'camera_name': [], 'date':[], 'hour':[], 'occlusion':[], 'snapshot_file':[]}
