@@ -89,7 +89,6 @@ def main():
         x[0]), intersection_id_dict[x[1]], float(x[2]), float(x[3])]) \
         .filter(lambda x: x[1] == args.targetIntersection) \
         .map(lambda x: [timestamp(x[0]), x[0], str(x[1]), str(x[2]), str(x[3])]) \
-        .filter(lambda x: x[0].month == args.targetMonth) \
         .sortBy(lambda x: x[0]) \
         .map(lambda x: [x[1], x[2], x[3], x[4]]) \
         .map(lambda x: ','.join(x) + "\n")
@@ -124,8 +123,8 @@ def main():
     #     json.dump(i, f)
     #     f.write('\n')
 
-    with open(args.output_filePath + 'sorted_ControllerLogs_Signal_' + str(int(args.targetIntersection)) + '_' + str(int(args.targetYear)) + '_' + str(int(args.targetMonth)) + '.csv', 'w') as f:
-        f.write("time,detector,phrase,parameter\n")
+    with open(args.output_filePath + 'sorted_ControllerLogs_Signal_' + file[:-4] + '.csv', 'w') as f:
+        f.write("time,detector,phase,parameter\n")
         for j in output:
             f.write(j)
 
@@ -135,10 +134,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='A1T1')
     parser.add_argument('--targetIntersection', type=float,
                         default=1039.0, help='the target intersection id')
-    parser.add_argument('--targetYear', type=int,
-                        default=2023, help='the target year')
-    parser.add_argument('--targetMonth', type=int,
-                        default=7, help='the target month')
     parser.add_argument('--filePath', type=str,
                         default=os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data/'), help='path of multiple files')
     parser.add_argument('--output_filePath', type=str,

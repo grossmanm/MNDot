@@ -436,7 +436,7 @@ if __name__ == '__main__':
     # the startdt and enddt should be complete days with time 00:00:00.000
     # the time range should be no more than 7 complete days
     parser.add_argument('--intersectionID', type=int,
-                        default=51.0, help='')
+                        default=51, help='')
     parser.add_argument('--startdt', type=str,
                         default='2023-01-01 00:00:00.000', help='the start datetime')
     parser.add_argument('--enddt', type=str,
@@ -447,15 +447,19 @@ if __name__ == '__main__':
                         default=os.path.join(os.path.dirname(os.getcwd()),'data/signal_data_stats/output-stat-51-2022Dec2023Jan.json'), help='the input file')
     
     parser.add_argument('--output_dir', type=str, default=os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data_analysis/'),help='where the output files will be written')
-    parser.add_argument('--output_file_basename', type=str, default='output-detected-51-22Dec23Jan-20230101-20230108', help='the base filename for all output files')
+    parser.add_argument('--output_file_basename', type=str, default='output-detected', help='the base filename for all output files')
     args = parser.parse_args()
 
-    output_GTcorr_file = os.path.join(args.output_dir, args.output_file_basename+'-allGroundTruthPearson.json')
-    output_NITcorr_file = os.path.join(args.output_dir, args.output_file_basename+'-allNITPearson.json')
-    output_GTanomalyhours_with_pearson = os.path.join(args.output_dir, args.output_file_basename+'-GroundTruthanomalyhours_with_pearson.json')
-    output_NITanomalyhours_with_pearson = os.path.join(args.output_dir, args.output_file_basename+'-NITanomalyhours_with_pearson.json')
-    output_file1 = os.path.join(args.output_dir, args.output_file_basename+'-seperateHours.json')
-    output_file2 = os.path.join(args.output_dir, args.output_file_basename+'-combinedHours.json')
+    date_template = '%Y-%m-%d %H:%M:%S.%f'
+    start_date = dt.datetime.strptime(args.startdt, date_template)
+    end_date = dt.datetime.strptime(args.enddt, date_template)
+    output_file_basename = args.output_file_basename+'-'+str(args.intersectionID)+'-'+str(start_date.year)+str(start_date.month)+str(start_date.day)+'-'+str(end_date.year)+str(end_date.month)+str(end_date.day)
+    output_GTcorr_file = os.path.join(args.output_dir, output_file_basename+'-allGroundTruthPearson.json')
+    output_NITcorr_file = os.path.join(args.output_dir, output_file_basename+'-allNITPearson.json')
+    output_GTanomalyhours_with_pearson = os.path.join(args.output_dir, output_file_basename+'-GroundTruthanomalyhours_with_pearson.json')
+    output_NITanomalyhours_with_pearson = os.path.join(args.output_dir, output_file_basename+'-NITanomalyhours_with_pearson.json')
+    output_file1 = os.path.join(args.output_dir, output_file_basename+'-seperateHours.json')
+    output_file2 = os.path.join(args.output_dir, output_file_basename+'-combinedHours.json')
 
     if __name__ == '__main__':
         sc_conf = pyspark.SparkConf() \

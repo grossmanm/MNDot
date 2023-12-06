@@ -74,7 +74,7 @@ if __name__ == '__main__':
    
     parser.add_argument('--output_file', type=str,
                         default=os.path.join(os.path.dirname(os.getcwd()),'data/singal_data_stats/output-stat-51-2023JulAugSep.json'), help='the output file')
-    parser.add_argument('--input_files', metavar='file', type=str, nargs='+', help='input filenamepip (s)')
+    parser.add_argument('--input_files', metavar='file', type=str, nargs='+', help='input filename(s)')
 
     args = parser.parse_args()
 
