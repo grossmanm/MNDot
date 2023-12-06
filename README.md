@@ -33,6 +33,7 @@ Weather data comes in the form of a .csv with the following schema.
 | EVENTDATE | WEATHERSENSOR | VSIBILITY | HUMIDITY | PRECIP RATE | WIND DIR | WIND SPEED | MAX TEMP | MIN TEMP | WET BULB TEMP | DEW POINT | FRICTION | SURFACE TEMP | SURFACE STATUS | SUBSURFACE TEMP | AIR TEMP | PRECIP TYPE | 
 |-----------|---------------|-----------|----------|-------------|----------|------------|----------|----------|---------------|-----------|----------|--------------|---------------|------------|-----------|----------|
 
+If the weather data does not follow this schema, try running `python change_schema.py`
 ### Video Data
 The video data is stored in the form of .mp4 files and is video taken from NIT cameras around the Twin-Cities Metropolitan area. Video files should follow one of the two naming schema listed below:
 1. `cs-u-benjen_[NIT device name]-[date]_[start time]_[end time].mp4`
