@@ -28,7 +28,14 @@ Actuated signal data is often delivered unsorted by time stamp, to sort the code
 
 ### Weather Data
 
-Weather data comes in the form of a .csv file and two possible schemas.
+Weather data comes in the form of a .csv with the following schema.
 
 | EVENTDATE | WEATHERSENSOR | VSIBILITY | HUMIDITY | PRECIP RATE | WIND DIR | WIND SPEED | MAX TEMP | MIN TEMP | WET BULB TEMP | DEW POINT | FRICTION | SURFACE TEMP | SURFACE STATUS | SUBSURFACE TEMP | AIR TEMP | PRECIP TYPE | 
 |-----------|---------------|-----------|----------|-------------|----------|------------|----------|----------|---------------|-----------|----------|--------------|---------------|------------|-----------|----------|
+
+### Video Data
+The video data is stored in the form of .mp4 files and is video taken from NIT cameras around the Twin-Cities Metropolitan area. Video files should follow one of the two naming schema listed below:
+1. `cs-u-benjen_[NIT device name]-[date]_[start time]_[end time].mp4`
+2. `nit_video2_[NIT device name]-[date]_[start time]_[end time].mp4`
+Ex) `cs-u-benjen_694_eriver_nramp_vision-20230115_075949-085948`
+    `nit_video2_65_81st_Vision_Stream1-20220703_190454_200033`
