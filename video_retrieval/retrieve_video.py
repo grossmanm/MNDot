@@ -19,7 +19,7 @@ time_ranges_file = args.time_ranges
 source_folder = args.source_folder
 video_dir = args.video_dir
 output_dir = args.output_dir
-permissions = args.permissions_file
+permissions = args.permission_file
 
 if not time_ranges_file:
     time_ranges_file = os.path.join(os.path.dirname(os.getcwd()), 'data/intermediate_files/time_ranges.csv')
@@ -43,7 +43,8 @@ output_file = os.path.join(output_dir, 'video_locations.csv')
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy( paramiko.AutoAddPolicy() )
 
-permissions = json.load(permissions)
+with open(permissions) as f:
+    permissions = json.load(f)
 
 # connect to directory
 ssh.connect(hostname=permissions['hostname'],username=permissions['user'],password=permissions['pwd'])
@@ -66,7 +67,6 @@ for i, item in time_ranges_df.iterrows():
     date = item['date']
     date = datetime.strptime(date, date_template_csv).date()
     hours = item['hours']
-
     stdin, stdout, stderr = ssh.exec_command(f'cd {source_folder}{camera_name}/; ls')
     
     files = stdout.readlines()
@@ -125,9 +125,9 @@ for i, item in time_ranges_df.iterrows():
     with SCPClient(ssh.get_transport()) as scp:
         for file in files_for_anomaly:
             #check if the file already has been downloaded, if it has skip
-            if not os.path.isfile(os.path.join(output_dir,file)):
+            if not os.path.isfile(os.path.join(video_dir,file)):
                 print(f"Downloading file: {file}")
-                scp.get(f"{source_folder}{camera_name}/{file}",output_dir)
+                scp.get(f"{source_folder}{camera_name}/{file}",video_dir)
 
 out_df = pd.DataFrame(out_dict)
 out_df.to_csv(output_file)

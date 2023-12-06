@@ -5,9 +5,8 @@ import os
 from datetime import datetime
 
 
-id_to_camera = {'51':'65_81st_Vision_Stream1','1039':'694_eriver_nramp_vision','1041':'694_eriver_sramp_vision', '596':'57_85th_Iteris_Stream1','54':'65_41st_gridsmart','210':'51_crc2_iteris', 
+id_to_camera = {'51':'65_81st_Vision_Stream1','1039':'694_eriver_nramp_vision','1041':'694_eriver_sramp_vision', '596':'47_85th_Iteris_Stream1','54':'65_41st_gridsmart','210':'51_crc2_iteris', 
                  '878':'s_65_viking_nuturn_gridsmart','877':'s_65_viking_suturn_gridsmart','899':'77_cliff_eramp_vision','898':'77_cliff_wramp_vision'}
-    
 parser = argparse.ArgumentParser()
 parser.add_argument('--detection_dir', type=str, help='Directory where the results of malfunction detection')
 parser.add_argument('--output_dir', type=str, help='Location of the output csv file' )
@@ -18,14 +17,15 @@ detection_dir = args.detection_dir
 output_dir = args.output_dir
 
 if not detection_dir:
-    detection_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/malfunctions/')
+    detection_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data_analysis/')
 
 if not output_dir:
     output_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/intermediate_files/')
 
 written_data = []
 date_template_csv = '%Y-%m-%d'
-detection_files = [file for file in os.listdir(detection_dir) if file.startswith('output-detected') and file.endswith('thresn06-seperateHours.json')]
+detection_files = [file for file in os.listdir(detection_dir) if file.startswith('output-detected') and file.endswith('seperateHours.json')]
+print(detection_files)
 malfunction_id = 0
 out_dict = {'malfunction_id':[], 'camera_name':[], 'date':[], 'hours':[]}
 for file in detection_files:
@@ -45,6 +45,7 @@ for file in detection_files:
             hour = anomaly['hour']
             hours = [hour]
             if (camera_name, date, hours) not in written_data:
+               # print((camera_name, date, hour))
                 out_dict['malfunction_id'].append(malfunction_id)
                 out_dict['camera_name'].append(camera_name)
                 out_dict['date'].append(date)

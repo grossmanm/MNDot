@@ -274,9 +274,13 @@ for i, item in malfunction_df.iterrows():
                 tracked_points = []
                 status = []
                 for i in range(len(grays)):
-                    p1, st, err = cv2.calcOpticalFlowPyrLK(old_grays[i], grays[i], zero_points[i], None, **lk_params)
-                    tracked_points.append(p1)
-                    status.append(st)
+                    if not type(zero_points[i]) == type(np.array([1])):    
+                        tracked_points.append([])
+                        status.append([])
+                    else:
+                        p1, st, err = cv2.calcOpticalFlowPyrLK(old_grays[i], grays[i], zero_points[i], None, **lk_params)
+                        tracked_points.append(p1)
+                        status.append(st)
 
 
                 magnitudes = []

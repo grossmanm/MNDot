@@ -30,8 +30,8 @@ if not output_dir:
 if not permissions:
     permissions = os.path.join(os.path.dirname(os.getcwd()), 'permissions/sql.json')
 
-
-permissions = json.load(permissions)
+with open(permissions) as f:
+    permissions = json.load(f)
 
 time_ranges_df = pd.read_csv(time_ranges_file)
 

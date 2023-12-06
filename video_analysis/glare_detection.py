@@ -145,30 +145,30 @@ for i, item in malfunction_df.iterrows():
                     if use_tl:
                         tl_frame = frame[0:frame_size[0]//2, 0:frame_size[1]//2]
                         tl_glare = glare.detect_glare(tl_frame)
-                        tl_glare_sum = (tl_glare/255>=0.85).sum()
+                        tl_glare_sum = (tl_glare/255>=0.95).sum()
                         tl_percent = tl_glare_sum/(tl_frame.shape[0]*tl_frame.shape[1])
                         glares.append(tl_percent)
                     if use_tr:
                         tr_frame = frame[0:frame_size[0]//2, frame_size[1]//2:]
                         tr_glare = glare.detect_glare(tr_frame)
-                        tr_glare_sum = (tr_glare/255>=0.85).sum()
+                        tr_glare_sum = (tr_glare/255>=0.95).sum()
                         tr_percent = tr_glare_sum/(tr_frame.shape[0]*tr_frame.shape[1])
                         glares.append(tr_percent)
                     if use_bl:
                         bl_frame = frame[frame_size[0]//2:,0:frame_size[1]//2]
                         bl_glare = glare.detect_glare(bl_frame)
-                        bl_glare_sum = (bl_glare/255>=0.85).sum()
+                        bl_glare_sum = (bl_glare/255>=0.95).sum()
                         bl_percent = bl_glare_sum/(bl_frame.shape[0]*bl_frame.shape[1])
                         glares.append(bl_percent)
                     if use_br:
                         br_frame = frame[frame_size[0]//2:,frame_size[1]//2:]
                         br_glare = glare.detect_glare(br_frame)
-                        br_glare_sum = (br_glare/255>=0.85).sum()
+                        br_glare_sum = (br_glare/255>=0.95).sum()
                         br_percent = br_glare_sum/(br_frame.shape[0]*br_frame.shape[1])
                         glares.append(br_percent)
                 else:
                     frame_glare = glare.detect_glare(frame)
-                    glare_sum = (frame_glare/255>0.85).sum()
+                    glare_sum = (frame_glare/255>0.95).sum()
                     glare_percent = glare_sum/(frame.shape[0]*frame.shape[1])
                     glares.append(glare_percent)
                 for j in range(len(glares)):
