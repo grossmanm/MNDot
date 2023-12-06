@@ -41,3 +41,17 @@ The video data is stored in the form of .mp4 files and is video taken from NIT c
 
 Ex) `cs-u-benjen_694_eriver_nramp_vision-20230115_075949-085948`
     `nit_video2_65_81st_Vision_Stream1-20220703_190454_200033`
+
+## To Run
+
+### Malfunction Detection
+If you're actuated signal data has already been ordered and is in the correct format you should run the following commands:
+`python 01-highrez-satistics.py --startdt=2022-12-01 00:00:00.000 --enddt=2023-02-01 00:00:00.000 --input_dir=data/signal_data_sorted/ --output_file=data/signal_data_stats/output-stat-51-2022Dec2023Jan.json --input_files= sorted_ControllerLogs_Signal_51_2022_12.csv sorted_ControllerLogs_Signal_51_2023_01.csv`
+
+This will generate time-series statstics about the actuated signal data. Next we will detect malfunctions with the following command:
+
+`python 02-highrez-localcorr.py --startdt=2023-01-01 00:00:00.000 --enddt=2023-01-08 00:00:00.000 --threshold=-0.6 --input_file=data/signal_data_stats/output-stat-51-2022Dec2023Jan.json --output_dir=data/signal_data_analysis/ --output_file_basename=output-detected`
+
+Note: startdt and enddt should be a week apart 
+
+The output file containing malfunctions will be written to output_dir and have the filename [output_file_basename]-separateHours.json
