@@ -9,17 +9,17 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--time_ranges', type=str, help='File containing the time ranges of malfunctions, output by extract_time_ranges.py')
 parser.add_argument('--source_folder', type=str, help='Drive location of videos')
-parser.add_argument('--video_dir', type=str, help='Where to put the retrieved videos')
+#parser.add_argument('--video_dir', type=str, help='Where to put the retrieved videos')
 parser.add_argument('--output_dir', type=str, help='Where to write the output csv')
-parser.add_argument('--permission_file', type=str, help='File containing server info')
+#parser.add_argument('--permission_file', type=str, help='File containing server info')
 
 args = parser.parse_args()
 
 time_ranges_file = args.time_ranges
 source_folder = args.source_folder
-video_dir = args.video_dir
+#video_dir = args.video_dir
 output_dir = args.output_dir
-permissions = args.permission_file
+#permissions = args.permission_file
 
 if not time_ranges_file:
     time_ranges_file = os.path.join(os.path.dirname(os.getcwd()), 'data/intermediate_files/time_ranges.csv')
@@ -27,27 +27,27 @@ if not time_ranges_file:
 if not source_folder:
     source_folder = '/mnt/test_video/'
 
-if not video_dir:
-    video_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/videos/')
+#if not video_dir:
+    #video_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/videos/')
 
 if not output_dir:
     output_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/intermediate_files/')
 
-if not permissions:
-    permissions = os.path.join(os.path.dirname(os.getcwd()), 'permissions/benjen.json')
+# if not permissions:
+#     permissions = os.path.join(os.path.dirname(os.getcwd()), 'permissions/benjen.json')
 
 time_ranges_df = pd.read_csv(time_ranges_file)
 
 output_file = os.path.join(output_dir, 'video_locations.csv')
 # initialize ssh
-ssh = paramiko.SSHClient()
-ssh.set_missing_host_key_policy( paramiko.AutoAddPolicy() )
+#ssh = paramiko.SSHClient()
+#ssh.set_missing_host_key_policy( paramiko.AutoAddPolicy() )
 
-with open(permissions) as f:
-    permissions = json.load(f)
+# with open(permissions) as f:
+#     permissions = json.load(f)
 
 # connect to directory
-ssh.connect(hostname=permissions['hostname'],username=permissions['user'],password=permissions['pwd'])
+#ssh.connect(hostname=permissions['hostname'],username=permissions['user'],password=permissions['pwd'])
 
 date_template_csv = '%Y-%m-%d'
 
@@ -67,11 +67,11 @@ for i, item in time_ranges_df.iterrows():
     date = item['date']
     date = datetime.strptime(date, date_template_csv).date()
     hours = item['hours']
-    stdin, stdout, stderr = ssh.exec_command(f'cd {source_folder}{camera_name}/; ls')
+    #stdin, stdout, stderr = ssh.exec_command(f'cd {source_folder}{camera_name}/; ls')
     
-    files = stdout.readlines()
+    #files = stdout.readlines()
     # use if files are already locally stored
-   # files = [x for x in os.listdir('/data4/malcolm/malfunction_videos/') if os.path.isfile(os.path.join('/data4/malcolm/malfunction_videos/',x))]
+    files = os.listdir(source_folder)
     files_for_anomaly = []
     hours = hours.strip('[]')
     hours = hours.split(',')
@@ -122,12 +122,12 @@ for i, item in time_ranges_df.iterrows():
 
     # download the files we identified
     # comment out if reading locally
-    with SCPClient(ssh.get_transport()) as scp:
-        for file in files_for_anomaly:
+   # with SCPClient(ssh.get_transport()) as scp:
+        #for file in files_for_anomaly:
             #check if the file already has been downloaded, if it has skip
-            if not os.path.isfile(os.path.join(video_dir,file)):
-                print(f"Downloading file: {file}")
-                scp.get(f"{source_folder}{camera_name}/{file}",video_dir)
+            #if not os.path.isfile(os.path.join(video_dir,file)):
+               # print(f"Downloading file: {file}")
+              #  scp.get(f"{source_folder}{camera_name}/{file}",video_dir)
 
 out_df = pd.DataFrame(out_dict)
 out_df.to_csv(output_file)

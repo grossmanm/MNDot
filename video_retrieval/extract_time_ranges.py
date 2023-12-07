@@ -25,7 +25,6 @@ if not output_dir:
 written_data = []
 date_template_csv = '%Y-%m-%d'
 detection_files = [file for file in os.listdir(detection_dir) if file.startswith('output-detected') and file.endswith('seperateHours.json')]
-print(detection_files)
 malfunction_id = 0
 out_dict = {'malfunction_id':[], 'camera_name':[], 'date':[], 'hours':[]}
 for file in detection_files:
