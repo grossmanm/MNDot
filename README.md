@@ -55,3 +55,35 @@ This will generate time-series statstics about the actuated signal data. Next we
 Note: startdt and enddt should be a week apart 
 
 The output file containing malfunctions will be written to output_dir and have the filename [output_file_basename]-separateHours.json
+
+### Weather Correlation
+We need to generate hourly traffic data and change the temporal resolution of the weather data to match. Run the following commands
+
+`python generate_traffic_daily_volume.py --traffic_data_dir=data/signal_data_sorted/ --output_dir=data/signal_data/hourly/`
+
+`python change_time_resolution.py --data_dir=data/weather_data/updated_schema/ --output_dir=data/weather_data/hourly/`
+
+Next we will analyze the results of the previous step and generate correlation values for the weather variables at each timestep
+
+`python analyze_weather_and_signal.py --weather_data_file=data/weather_data/hourly/Little Canada_8_9_hourly.csv --traffic_data_dir=data/signal_data/hourly/ --output_dir=data/results/`
+
+
+While we are doing this we should also generate mean and standard deviation values for the weather data. The results will be used later
+
+`python calc_hourly_mean_std --source_dir=data/weather_data/updated_schema/ --output_dir=data/weather_data/means/`
+
+### Video Detection
+We read the malfunciton data and assign them id's 
+`python extract_time_ranges.py --detection_dir=data/signal_data_analysis/ --output_dir=data/intermediate_files/`
+
+Now we want to find which videos are associated with which malfunctions
+
+`python retrieve_video.py --time_ranges=data/intermediate_files/time_ranges.csv --source_folder=data/videos/ --output_dir=data/intermediate_files/`
+
+Now we have a csv file with malfunctions and their associated files. Next we will look for occlusion. This will take quite a while
+
+`python occlusion_detection.py --malfunction_file=data/intermediate_files/video_lcoations.csv --snapshot_dir=data/snapshots/ --video_dir=data/videos/ --output_dir=data/results/`
+
+Now we assign a malfunction type based off of the detection
+
+`python assign_malfunction_type.py --occlusion_file=data/results/detected_occlusion.py --output_file=data/results/detected_malfunctions.csv`
