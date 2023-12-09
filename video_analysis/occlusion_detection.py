@@ -275,8 +275,8 @@ for i, item in malfunction_df.iterrows():
                 status = []
                 for i in range(len(grays)):
                     if not type(zero_points[i]) == type(np.array([1])):    
-                        tracked_points.append([])
-                        status.append([])
+                        tracked_points.append(None)
+                        status.append(None)
                     else:
                         p1, st, err = cv2.calcOpticalFlowPyrLK(old_grays[i], grays[i], zero_points[i], None, **lk_params)
                         tracked_points.append(p1)
