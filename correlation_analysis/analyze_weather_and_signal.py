@@ -5,22 +5,24 @@ from data_loader import *
 from locorr import *
 import os
 import argparse
+import scipy.spatial as scp
 from datetime import timedelta
+from datetime import datetime
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--weather_data_file', type=str, help='Location of hourly weather data file')
+parser.add_argument('--weather_data_dir', type=str, help='Location of hourly weather data')
 parser.add_argument('--traffic_data_dir', type=str, help='Location of traffic data')
 parser.add_argument('--output_dir', type=str, help='Where the local correlation results will be written')
 
 args = parser.parse_args()
 
-weather_data_file = args.weather_data_file
+weather_data_dir = args.weather_data_dir
 traffic_data_dir = args.traffic_data_dir
 output_dir = args.output_dir
 
 hourly = 1
-if not weather_data_file:
-    weather_data_file = os.path.join(os.path.dirname(os.getcwd()), 'data/weather_data/hourly/Little Canada_8_9_hourly.csv')
+if not weather_data_dir:
+    weather_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/weather_data/means/')
 if not traffic_data_dir:
     traffic_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/traffic/hourly/')
 if not output_dir:
@@ -28,10 +30,21 @@ if not output_dir:
 
 input_size = 14
 
-
 traffic_data_files = os.listdir(traffic_data_dir)
 
-df = pd.read_csv(weather_data_file)
+
+
+#df = pd.read_csv(weather_data_file)
+
+
+weather_location_map = {'cayuga':[44.96670383773909, -93.08861734632399], 'coates':[44.66570387767664, -93.0100457485304], 
+                        'delano':[45.04, -93.76], 'bethel':[45.346454, -93.237496], '35w':[44.79853511526915, -93.2902160282043],
+                        'inner grove':[44.875089237096034, -93.07399238699924], 'little canada':[45.03818723828624, -93.06287892907933],
+                        'maple grove':[45.095097942100466, -93.44926670394744], 'mayer':[44.90596911346018, -93.86977661071903],
+                        'minnetonka':[44.93996649497237, -93.46034320452821]}
+nit_location_map = {'51':[45.1150,-93.241732], '1039':[45.069585,-93.278772], '1041':[45.06892,-93.279158], '899':[44.790226,-93.21963],
+                    '596':[45.125053, -93.264553], '54': [45.04274, -93.247337], '210':[45.02791,-93.167081], '878':[45.322122,-93.236216],
+                    '877':[45.317065,-93.235865], '899':[44.79022,-93.21963], '898':[44.79023,-93.223347]}
 
 # print(df)
 
@@ -80,41 +93,67 @@ df = pd.read_csv(weather_data_file)
 # plot_result(tempurature_name, temp)
 # plot_result('PRECIP TYPE', type)
 
+weather_station_tree = scp.KDTree(list(weather_location_map.values()))
 
 def analyze_data(file_name1):
+    id2street = {'51': '65_81st', '210': '51_crc2', '1039': '694_eriver_nramp', '1041':'694_eriver_nramp','899':'77_cliff_eramp'}
 
-    street_id = file_name1.split('_')[0]
-    time_span = file_name1.split('_')[1] + '_' + file_name1.split('_')[2]
+    columns = ['VISIBLITY_m', 'HUMIDITY_m', 'PRECIP RATE_m', 'WIND SPEED_m','AIR TEMP_m', 
+               'MIN TEMP_m', 'MAX TEMP_m', 'WET BULB TEMP_m','DEW POINT_m', 'SURFACE TEMP_m', 'SUBSURFACE TEMP_m']
 
-    id2street = {'51': '65_81st', '210': '51_crc2', '1039': '694_eriver_nramp', '1041':'694_eriver_nramp'}
-
-    columns = ['VISIBLITY', 'HUMIDITY', 'PRECIP TYPE',
-                                       'PRECIP RATE', 'WIND DIR', 'WIND SPEED',
-                                       'AIR TEMP', 'MIN TEMP', 'MAX TEMP', 'WET BULB TEMP',
-                                        'DEW POINT', 'SURFACE TEMP', 'SUBSURFACE TEMP',
-                                       'SURFACE STATUS']
+    out_columns = ['VISIBLITY', 'HUMIDITY', 'PRECIP RATE', 'WIND SPEED','AIR TEMP', 
+               'MIN TEMP', 'MAX TEMP', 'WET BULB TEMP','DEW POINT', 'SURFACE TEMP', 'SUBSURFACE TEMP']
+    print(file_name1)
+    intersection_id = file_name1.split('_')[3]
+    nearest_weather_station = weather_station_tree.query([nit_location_map[intersection_id]], k=1)[1][0]
+    nearest_weather_station = list(weather_location_map.keys())[nearest_weather_station]
+    # find the csv containing the data for the nearest weather station
+    cut=150
+    weather_data_files = os.listdir(weather_data_dir)
+    weather_file = None
+    for file in weather_data_files:
+        if nearest_weather_station in file.lower():
+            weather_file = file
+    df = pd.read_csv(os.path.join(weather_data_dir, weather_file))
 
 
     local_corr_map_high = {}
     local_corr_map_low = {}
-    cut = 150
-    detection1 = get_data(os.path.join(traffic_data_dir, file_name1))
+    traffic_data = pd.read_csv(os.path.join(traffic_data_dir, file_name1))
+    dates_dict = {}
+    start_month = datetime.strptime(traffic_data['date'][0], '%Y-%m-%d').month
+    for i, item in traffic_data.iterrows():
+        key = (datetime.strptime(item['date'], '%Y-%m-%d'), item['hour'])
+        if key not in dates_dict:
+            dates_dict[key] = item['count']
+    traffic_data = traffic_data['count'].to_numpy()
+
     # detection2 = get_data(dir + file_name2)
     # detection3 = get_data(dir + file_name3)
 
-    res = pd.DataFrame(columns=['Date'] + columns)
+    res = pd.DataFrame(columns=['date', 'hour'] + out_columns)
     for i in range(len(columns)):
     # for i in [15]:
-        metric = df[columns[i]].to_numpy()
+        metric = [df['date'].to_numpy(), df['hour'].to_numpy(), df[columns[i]].to_numpy()]
+        used_times = []
+        traffic_counts=[]
+        weather_metric=[]
+        for j in range(len(metric[0])):
+            key = (datetime.strptime(metric[0][j], '%Y-%m-%d'), metric[1][j])
+            if key in dates_dict:    
+                used_times.append(key[0]+timedelta(hours=int(key[1])))
+                traffic_counts.append(dates_dict[key])
+                weather_metric.append(metric[2][j])
+        
         # detection1[20:20+valid_len]
 
         # np_data = np.array([detection1[20:20+valid_len], detection2[20:20+valid_len], detection3[20:20+valid_len],
         #                     visibility, humidity, temp, type]).transpose()
 
         # valid_len = min(len(detection1), len(detection2), len(detection3))
-        valid_len = min(len(metric), len(detection1))
-        np_data = np.array([detection1[:valid_len], metric[:valid_len]]).transpose()
-        data = pd.DataFrame(np_data, columns=[id2street[street_id], columns[i]])
+        valid_len = min(len(weather_metric), len(traffic_counts))
+        np_data = np.array([traffic_counts[:valid_len], weather_metric[:valid_len]]).transpose()
+        data = pd.DataFrame(np_data, columns=[id2street[intersection_id], columns[i]])
 
         df_max_scaled = data.copy()
 
@@ -128,7 +167,6 @@ def analyze_data(file_name1):
         score0 = np.asarray(localCorr(np_data[:, 0], np_data[:, 1], input_size))
 
         # plot_loc_corr(np_data[:,0], columns[id2street[street_id]], np_data[:,1], columns[i], score0)
-
         before = 0
         after = 0
 
@@ -175,6 +213,7 @@ def analyze_data(file_name1):
         #plot_loc_corr(v1, columns[id2street[street_id]], v3, columns[i], v5, )
 
         start_date = datetime(2023, 8, 1)
+        start_date = min(used_times)
         delta = timedelta(hours=1)
 
         date = []
@@ -183,37 +222,28 @@ def analyze_data(file_name1):
         transfered_prob = NormalizeData(v5)
         for a in range(len(transfered_prob)):
             delta_time = delta * (a + input_size)
-            date.append(str(start_date + delta_time) )
+            date.append(start_date + delta_time) 
             record.append(transfered_prob[a])
             #print(str(start_date + delta_time) +
             #      ', ' + str(transfered_prob[a]))
-        if i == 3:
-            res['Date'] = date
-
-        res[columns[i]] = record
+        dates = [x.date() for x in date]
+        hours = [x.hour for x in date]
+        res['date'] = dates
+        res['hour'] = hours 
+        res[out_columns[i]] = record    
 
         local_corr_map_high[columns[i]] = np.mean(sorted(score0)[cut:])
         local_corr_map_low[columns[i]] = np.mean(sorted(score0)[:cut])
 
-    print('Intersection: ' + id2street[street_id])
-    print('Time span: ' + time_span)
+    print('Intersection: ' + id2street[intersection_id])
+    #print('Time span: ' + time_span)
     # print(local_corr_map_high)
     # print(local_corr_map_low)
     ratio = {}
     for key in local_corr_map_low.keys():
         ratio[key] = local_corr_map_high[key] / local_corr_map_low[key]
 
-    sorted_ratio = sorted(ratio.items(), key=lambda x:x[1])
-    #print(sorted_ratio)
-    columns_to_drop = []
-    for x in range(-1, -4, -1):
-        columns_to_drop.append(sorted_ratio[x][0])
-
-    columns_to_drop.append('SURFACE STATUS')
-    res.drop(columns=columns_to_drop, inplace=True)
-
-    to_file = os.path.join(output_dir,'local_correlation_' + id2street[street_id] + '.csv')
-    print(to_file)
+    to_file = os.path.join(output_dir,'local_correlation_' + id2street[intersection_id] +'_'+ str(start_month)+'.csv')
     res.to_csv(to_file, index=None)
 
 for file in traffic_data_files:

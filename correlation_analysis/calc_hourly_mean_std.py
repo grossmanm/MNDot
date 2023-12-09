@@ -6,6 +6,7 @@ import numpy as np
 import os
 from collections import Counter
 import warnings
+import re
 import argparse
 warnings.filterwarnings("ignore")
 
@@ -54,9 +55,11 @@ surface_status = {
 
 
 
+
+format = '%m/%d/%Y %H:%M %p'
 # format = "%Y-%m-%d %H:%M:%S.%f"
-format = "%m/%d/%y %H:%M"
-format1 = "%a %b %d %Y %I:%M:%S %p %Z"
+# format = "%m/%d/%y %H:%M"
+format1 = "%m/%d/%y %H:%M"
 format2 = "%m/%d/%Y %H %p"
 
 
@@ -66,6 +69,15 @@ grain_span = 60*60
 id2month = {}
 lowest_temp = -18
 tempurature_name = 'AIR TEMP'
+
+def extract_numeric_value(string):
+    pattern = r'([0-9]+(?:\.[0-9]+)?)'
+
+    matches = re.findall(pattern, string)
+    if matches:
+        return float(matches[0])
+    else:
+        return None
 
 def get_idx(grain_span, time, start_time):
     return int((time - start_time).total_seconds()/grain_span)
@@ -109,9 +121,8 @@ for filename in sorted([x for x in os.listdir(dir) if 'changed' in x]):
     print(filename + " is starting...")
 
     df = pd.read_csv(dir + filename)
-    df = df.dropna()
-    col = df['WET BULB TEMP'].unique()
 
+    col = df['WET BULB TEMP'].unique()
     data = {}
     data['date'] = {}
     data['hour'] = {}
@@ -131,21 +142,22 @@ for filename in sorted([x for x in os.listdir(dir) if 'changed' in x]):
     data['SURFACE STATUS'] = {}
 
     for i, row in df.iterrows():
+        if type(row['EVENTDATE'])==float:
+            continue
         seg = row['EVENTDATE'].split(' ')
         if 'midnight' in seg[1]:
-            time = seg[0][:-4] + seg[0][-2:] + ' 0:00'
+            time = seg[0][:-4] + seg[0][-2:] + ' 00:00'
         elif 'noon' in seg[1]:
             time = seg[0][:-4] + seg[0][-2:] + ' 12:00'
         else:
             time = row['EVENTDATE']
-
+        if 'a.m.' in time:
+                time = time.replace('a.m.', 'AM')
+        elif 'p.m.' in time:
+            time = time.replace('p.m.', 'PM')
         try:
             time = datetime.strptime(time, format)
         except:
-            if 'am' in time:
-                time = time.replace('am', 'AM')
-            elif 'pm' in time:
-                time = time.replace('pm', 'PM')
             try:
                 time = datetime.strptime(time, format1)
             except:
@@ -193,69 +205,76 @@ for filename in sorted([x for x in os.listdir(dir) if 'changed' in x]):
             ## handle outlier
         data['date'][idx] = date
         data['hour'][idx] = hour
-        if row['VISIBLITY'] != 'None' and row['VISIBLITY'] != '-':
-            data['VISIBLITY'][idx].append(float(row['VISIBLITY']))
+        if row['VISIBLITY'] != 'None' and row['VISIBLITY'] != '—' and type(row['VISIBLITY']) != float:
+            data['VISIBLITY'][idx].append(float(extract_numeric_value(row['VISIBLITY'])))
         else:
             data['VISIBLITY'][idx].append(0)
-        if row['HUMIDITY'] != 'None' and row['HUMIDITY'] != '-':
-            data['HUMIDITY'][idx].append(float(row['HUMIDITY']))
+        if row['HUMIDITY'] != 'None' and row['HUMIDITY'] != '—' and type(row['HUMIDITY']) != float:
+            data['HUMIDITY'][idx].append(float(extract_numeric_value(row['HUMIDITY'])))
         else:
             data['HUMIDITY'][idx].append(0)
-        data['PRECIP TYPE'][idx].append(row['PRECIP TYPE'])
+        if type(row['PRECIP TYPE']) == float:
+            data['PRECIP TYPE'][idx].append('None')
+        else:
+            data['PRECIP TYPE'][idx].append(row['PRECIP TYPE'])
         if row['PRECIP RATE'] != 'None' and row['PRECIP RATE'] != '-':
             data['PRECIP RATE'][idx].append(float(row['PRECIP RATE']))
         else:
             data['PRECIP RATE'][idx].append(0)
         data['WIND DIR'][idx].append(row['WIND DIR'])
-        if row['WIND SPEED'] != 'None' and row['WIND SPEED'] != '-':
-            data['WIND SPEED'][idx].append(float(row['WIND SPEED']))
+        if row['WIND SPEED'] == '?':
+            data['WIND SPEED'][idx].append(0)
+        elif row['WIND SPEED'] != 'None' and row['WIND SPEED'] != '-':
+            data['WIND SPEED'][idx].append(float(extract_numeric_value(row['WIND SPEED'])))
         else:
             data['WIND SPEED'][idx].append(0)
         # if row[tempurature_name] != 'None' and '-' not in row[tempurature_name]:
         if row[tempurature_name] != 'None' and row[tempurature_name] != '-':
-            tempurature = float(row[tempurature_name])
+            tempurature = float(extract_numeric_value(row[tempurature_name]))
             data[tempurature_name][idx].append(tempurature)
             recent_temp1 = tempurature
         else:
             data[tempurature_name][idx].append(recent_temp1)
         if row['MIN TEMP'] != 'None' and row['MIN TEMP'] != '-':
-            tempurature = float(row['MIN TEMP'])
+            tempurature = float(extract_numeric_value(row['MIN TEMP']))
             data['MIN TEMP'][idx].append(tempurature)
             recent_temp2 = tempurature
         else:
             data['MIN TEMP'][idx].append(recent_temp2)
         if row['MAX TEMP'] != 'None' and row['MAX TEMP'] != '-':
-            tempurature = float(row['MAX TEMP'])
+            tempurature = float(extract_numeric_value(row['MAX TEMP']))
             data['MAX TEMP'][idx].append(tempurature)
             recent_temp3 = tempurature
         else:
             data['MAX TEMP'][idx].append(recent_temp3)
         if row['WET BULB TEMP'] != 'None' and row['WET BULB TEMP'] != '-':
-            tempurature = float(row['WET BULB TEMP'])
+            tempurature = float(extract_numeric_value(row['WET BULB TEMP']))
             data['WET BULB TEMP'][idx].append(tempurature)
             recent_temp4 = tempurature
         else:
             data['WET BULB TEMP'][idx].append(recent_temp4)
         if row['DEW POINT'] != 'None' and row['DEW POINT'] != '-':
-            tempurature = float(row['DEW POINT'])
+            tempurature = float(extract_numeric_value(row['DEW POINT']))
             data['DEW POINT'][idx].append(tempurature)
             recent_temp5 = tempurature
         else:
             data['DEW POINT'][idx].append(recent_temp5)
-        if row['SURFACE TEMP'] != 'None' and row['SURFACE TEMP'] != '-':
-            tempurature = float(row['SURFACE TEMP'])
+        if row['SURFACE TEMP'] != 'None' and row['SURFACE TEMP'] != '-' and type(row['SURFACE TEMP']) != float:
+            tempurature = float(extract_numeric_value(row['SURFACE TEMP']))
             data['SURFACE TEMP'][idx].append(tempurature)
             recent_temp6= tempurature
         else:
             data['SURFACE TEMP'][idx].append(recent_temp6)
-        if row['SUBSURFACE TEMP'] != 'None' and row['SUBSURFACE TEMP'] != '-':
-            tempurature = float(row['SUBSURFACE TEMP'])
+        if row['SUBSURFACE TEMP'] != 'None' and row['SUBSURFACE TEMP'] != '-' and type(row['SUBSURFACE TEMP']) != float:
+            tempurature = float(extract_numeric_value(row['SUBSURFACE TEMP']))
             data['SUBSURFACE TEMP'][idx].append(tempurature)
             recent_temp7 = tempurature
         else:
             data['SUBSURFACE TEMP'][idx].append(recent_temp7)
-
-        data['SURFACE STATUS'][idx].append(row['SURFACE STATUS'])
+        if type(row['SURFACE STATUS']) == float:
+            data['SURFACE STATUS'][idx].append('None')
+        else:
+            data['SURFACE STATUS'][idx].append(row['SURFACE STATUS'])
 
         
     df = pd.DataFrame(columns=['date', 'hour', 'VISIBLITY_m', 'HUMIDITY_m', 'PRECIP TYPE_m',
@@ -338,8 +357,5 @@ for filename in sorted([x for x in os.listdir(dir) if 'changed' in x]):
     # elif z == 1:
     #     df.to_csv(path + prefix + "_12_1_daily.csv", index=False)
     #     print("output winter for " + prefix)
-    if grain_span == 60*60:
-        df.to_csv(path + prefix + ".csv", index=False)
-    elif grain_span == 60*60*24:
-        df.to_csv(path + prefix + ".csv", index=False)
+    df.to_csv(path + prefix + ".csv", index=False)
 

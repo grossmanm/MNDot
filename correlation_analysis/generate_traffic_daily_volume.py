@@ -26,7 +26,7 @@ if not output_dir:
 # file_name = 'sorted_ControllerLogs_Signal_1039_2022_12.csv'
 # file_name = 'sorted_ControllerLogs_Signal_1039_2023_1.csv'
 
-format = "%m/%d/%Y %H:%M:%S.%f"
+format = "%Y-%m-%d %H:%M:%S.%f"
 
 days_span = 31
 grain_span = 60*60
@@ -49,25 +49,29 @@ for filename in os.listdir(traffic_data_dir):
     print(str(c) + "/" + str(total))
     print(filename + " is starting...")
 
+    
+    
+
     df = pd.read_csv(os.path.join(traffic_data_dir, filename), index_col=False)
-    df.drop(df.columns[0], axis=1, inplace=True)
+    #df.drop(df.columns[0], axis=1, inplace=True)
     df.columns = ["time", "detector", "phrase", "parameter"]
 
-    start_time = datetime.strptime(df['time'][0], format)
-
-    activate81 = np.zeros(time_steps)
-    activate82 = np.zeros(time_steps)
+    activate81 = {}
+    activate82 = {}
 
     for i, row in df.iterrows():
 
         time = datetime.strptime(row['time'], format)
+        detector = row['detector']
 
         # time = row['time']
         # idx = int((time - start_time).total_seconds())
-        idx = get_idx(grain_span, time, start_time)
-        if idx >= time_steps:
-            break
-
+        date = time.date()
+        hour = time.time().hour
+        idx = (detector,date,hour)
+        if idx not in activate81:
+            activate81[idx] = 0
+            activate82[idx] = 0
         if int(row['phrase']) == 81:
             activate81[idx] += 1
         elif int(row['phrase']) == 82:
@@ -88,12 +92,16 @@ for filename in os.listdir(traffic_data_dir):
 
     print(filename + " is finished!")
     c += 1
-
+    out_dict = {'intersection_id':[], 'date':[], 'hour':[], 'count':[]}
+    for key in activate81.keys():
+        out_dict['intersection_id'].append(key[0])
+        out_dict['date'].append(key[1])
+        out_dict['hour'].append(key[2])
+        out_dict['count'].append(activate81[key])
     # id = int(segs[-3])
     # if len(id2month[id].keys()) == 4:
     #     if 6 in id2month[id] and 7 in id2month[id]:
     out_file = filename[:-4] + '_hourly.csv'
-    summer = activate81
-    DF_summer = pd.DataFrame(summer)
-    DF_summer.to_csv(os.path.join(output_dir, out_file), index=False, header=False)
+    df = pd.DataFrame(out_dict)
+    df.to_csv(os.path.join(output_dir, out_file), index=False)
 
