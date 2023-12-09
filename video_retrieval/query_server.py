@@ -5,7 +5,7 @@ import argparse
 from datetime import datetime
 import json
     
-id_to_camera = {'51':'65_81st_Vision_Stream1','1039':'694_eriver_nramp_vision','1041':'694_eriver_sramp_vision', '596':'57_85th_Iteris_Stream1','54':'65_41st_gridsmart','210':'51_crc2_iteris', 
+id_to_camera = {'51':'65_81st_Vision_Stream1','1039':'694_eriver_nramp_vision','1041':'694_eriver_sramp_vision', '596':'47_85th_Iteris_Stream1','54':'65_41st_gridsmart','210':'51_crc2_iteris', 
                  '878':'s_65_viking_nuturn_gridsmart','877':'s_65_viking_suturn_gridsmart','899':'77_cliff_eramp_vision','898':'77_cliff_wramp_vision'}
     
 date_template = '%Y-%m-%d'
