@@ -11,7 +11,7 @@ parser.add_argument('--output_dir', type=str, help='where the output file will b
 
 args = parser.parse_args()
 
-k_percent = 80
+
 
 correlation_dir = args.correlation_dir
 known_correlation_file = args.known_correlation_file
@@ -24,22 +24,16 @@ if not known_correlation_file:
 if not output_dir:
     output_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/weather_data/global_variables/')
 
-
+k_percent = 80
 correlation_files = os.listdir(correlation_dir)
 
 known_correlation = pd.read_csv(known_correlation_file)
 known_correlation_list = known_correlation['variable'].to_numpy()
 
 for file in correlation_files:
+    file_template = file.replace('local_correlations', '')[:-4]
     out_dict = {'variable':[]}
     correlation_df = pd.read_csv(os.path.join(correlation_dir, file))
-    # get the month
-    start_date = correlation_df['date'][0]
-    month = datetime.strptime(start_date, '%Y-%m-%d').month
-
-    # get location
-    location = file.split('_')[2]
-    print(location)
     # get column names and exclude date and hour
     weather_variables = list(correlation_df.columns)[2:]
 
@@ -67,4 +61,4 @@ for file in correlation_files:
         if use:
             out_dict['variable'].append(var)
     out_df = pd.DataFrame(out_dict)
-    out_df.to_csv(os.path.join(output_dir, 'global_correlated_vars_'+str(location)+'_'+str(month)+'.csv'))
+    out_df.to_csv(os.path.join(output_dir, 'global_correlated_vars'+file_template+'.csv'))
