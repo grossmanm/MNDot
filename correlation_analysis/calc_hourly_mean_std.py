@@ -11,7 +11,7 @@ import argparse
 warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--source_dir', type=str, default=os.path.join(os.path.dirname(os.getcwd()),'data/weather_data/raw/'), help='Directory where raw weather data is stored')
+parser.add_argument('--source_dir', type=str, default=os.path.join(os.path.dirname(os.getcwd()),'data/weather_data/updated_schema/'), help='Directory where raw weather data is stored')
 parser.add_argument('--output_dir', type=str, default=os.path.join(os.path.dirname(os.getcwd()),'data/weather_data/means/'), help='Output directroy of weather data')
 
 args = parser.parse_args()
