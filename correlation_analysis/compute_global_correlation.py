@@ -31,7 +31,7 @@ known_correlation = pd.read_csv(known_correlation_file)
 known_correlation_list = known_correlation['variable'].to_numpy()
 
 for file in correlation_files:
-    file_template = file.replace('local_correlations', '')[:-4]
+    file_template = file.replace('local_correlation', '')[:-4]
     out_dict = {'variable':[]}
     correlation_df = pd.read_csv(os.path.join(correlation_dir, file))
     # get column names and exclude date and hour
