@@ -53,7 +53,10 @@ def main():
     # print(data.take(10))
 
     output = data.collect()
-    f = open(args.output_file, 'w')
+    intersection_id = int(output[0]['intersection'])
+    start_date = str(dt.datetime.strptime(args.startdt, '%Y-%m-%d %H:%M:%S.%f').date())
+    end_date = str(dt.datetime.strptime(args.enddt, '%Y-%m-%d %H:%M:%S.%f').date())
+    f = open(os.path.join(args.output_dir, f'output_stat_{intersection_id}_{start_date}_{end_date}.json'), 'w')
     for i in output:
         json.dump(i, f)
         f.write('\n')
@@ -67,14 +70,14 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='A1T1')
     parser.add_argument('--startdt', type=str,
-                        default='2023-07-01 00:00:00.000', help='the start datetime')
+                        default='2022-12-01 00:00:00.000', help='the start datetime')
     parser.add_argument('--enddt', type=str,
-                        default='2023-09-30 23:59:59.900', help='the end datetime')
+                        default='2023-01-30 00:00:00.000', help='the end datetime')
     parser.add_argument('--input_dir', type=str, default=os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data_sorted/'), help='the directory of the input files')
    
-    parser.add_argument('--output_file', type=str,
-                        default=os.path.join(os.path.dirname(os.getcwd()),'data/singal_data_stats/output-stat-51-2023JulAugSep.json'), help='the output file')
-    parser.add_argument('--input_files', metavar='file', type=str, nargs='+', help='input filename(s)')
+    parser.add_argument('--output_dir', type=str,
+                        default=os.path.join(os.path.dirname(os.getcwd()),'data/signal_data_stats/'), help='the output file')
+    parser.add_argument('--input_files', nargs='+', help='input filename(s)')
 
     args = parser.parse_args()
 
