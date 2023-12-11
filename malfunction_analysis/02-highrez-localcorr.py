@@ -21,18 +21,14 @@ def main():
 
     # convert the date in string format to a datetime.date object
     def datestamp(string):
-        string = string.split('-')
+        return dt.datetime.strptime(string, '%Y-%m-%d').date()
         # .isoformat(timespec='milliseconds')
         return dt.date(year=int(string[0]), month=int(string[1]), day=int(string[2]))
 
     # convert the datetime in string format to a datetime.datetime object
     def timestamp(string):
-        string = string.split(' ')
-        string0 = string[0].split('-')
-        string1 = string[1].split('.')
-        string2 = string1[0].split(':')
-        return dt.datetime(year=int(string0[0]), month=int(string0[1]), day=int(string0[2]), hour=int(string2[0]), minute=int(string2[1]), second=int(string2[2]), microsecond=int(string1[1] + '000'))
-
+        return dt.datetime.strptime(string, '%Y-%m-%d')
+    
     # fill the empty hours with 0 in a day
     def fill_ept(a_list):
         hour_idx = list(range(0, 24))
@@ -185,11 +181,7 @@ def main():
         return dt.datetime(year=int(string[0]), month=int(string[1]), day=int(string[2]), hour=hour)
 
     def endtimestamp(string):
-        string = string.split(' ')
-        string0 = string[0].split('-')
-        string1 = string[1].split('.')
-        string2 = string1[0].split(':')
-        return dt.datetime(year=int(string0[0]), month=int(string0[1]), day=int(string0[2]), hour=int(string2[0]))
+        return dt.datetime.strptime(string, '%Y-%m-%d')
 
     def hourdifference(item):
         return (item[0], (item[1] - item[0]) / timedelta(hours=1))
@@ -438,26 +430,26 @@ if __name__ == '__main__':
     parser.add_argument('--intersectionID', type=int,
                         default=51, help='')
     parser.add_argument('--startdt', type=str,
-                        default='2023-01-01 00:00:00.000', help='the start datetime')
+                        default='2023-01-01', help='the start datetime')
     parser.add_argument('--enddt', type=str,
-                        default='2023-01-08 00:00:00.000', help='the end datetime')
+                        default='2023-01-08', help='the end datetime')
     parser.add_argument('--threshold', type=float,
                         default=-0.6, help='the threshold of pearson correlation to define strong negetive correlation')
     parser.add_argument('--input_file', type=str,
-                        default=os.path.join(os.path.dirname(os.getcwd()),'data/signal_data_stats/output-stat-51-2022Dec2023Jan.json'), help='the input file')
+                        default=os.path.join(os.path.dirname(os.getcwd()),'data/signal_data_stats/output_stat_51_2022-12-01_2023-01-30.json'), help='the input file')
     
     parser.add_argument('--output_dir', type=str, default=os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data_analysis/'),help='where the output files will be written')
-    parser.add_argument('--output_file_basename', type=str, default='output-detected', help='the base filename for all output files')
+    parser.add_argument('--output_file_basename', type=str, default='output_detected', help='the base filename for all output files')
     args = parser.parse_args()
 
-    date_template = '%Y-%m-%d %H:%M:%S.%f'
+    date_template = '%Y-%m-%d'
     start_date = dt.datetime.strptime(args.startdt, date_template)
     end_date = dt.datetime.strptime(args.enddt, date_template)
-    output_file_basename = args.output_file_basename+'-'+str(args.intersectionID)+'-'+str(start_date.year)+str(start_date.month)+str(start_date.day)+'-'+str(end_date.year)+str(end_date.month)+str(end_date.day)
-    output_GTcorr_file = os.path.join(args.output_dir, output_file_basename+'-allGroundTruthPearson.json')
-    output_NITcorr_file = os.path.join(args.output_dir, output_file_basename+'-allNITPearson.json')
-    output_GTanomalyhours_with_pearson = os.path.join(args.output_dir, output_file_basename+'-GroundTruthanomalyhours_with_pearson.json')
-    output_NITanomalyhours_with_pearson = os.path.join(args.output_dir, output_file_basename+'-NITanomalyhours_with_pearson.json')
+    output_file_basename = args.output_file_basename+'_'+str(args.intersectionID)+'_'+str(start_date.date())+'_'+str(end_date.date())
+    output_GTcorr_file = os.path.join(args.output_dir, output_file_basename+'_allGroundTruthPearson.json')
+    output_NITcorr_file = os.path.join(args.output_dir, output_file_basename+'_allNITPearson.json')
+    output_GTanomalyhours_with_pearson = os.path.join(args.output_dir, output_file_basename+'_GroundTruthanomalyhours_with_pearson.json')
+    output_NITanomalyhours_with_pearson = os.path.join(args.output_dir, output_file_basename+'_NITanomalyhours_with_pearson.json')
     output_file1 = os.path.join(args.output_dir, output_file_basename+'-seperateHours.json')
     output_file2 = os.path.join(args.output_dir, output_file_basename+'-combinedHours.json')
 
