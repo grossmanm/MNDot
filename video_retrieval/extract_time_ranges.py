@@ -24,15 +24,19 @@ if not output_dir:
 
 written_data = []
 date_template_csv = '%Y-%m-%d'
-detection_files = [file for file in os.listdir(detection_dir) if file.startswith('output-detected') and file.endswith('seperateHours.json')]
+detection_files = [file for file in os.listdir(detection_dir) if file.startswith('output_detected') and file.endswith('seperateHours.json')]
 malfunction_id = 0
 out_dict = {'malfunction_id':[], 'camera_name':[], 'date':[], 'hours':[]}
 for file in detection_files:
     times = []
-    camera_id = file.split('-')[2]
-    camera_name = id_to_camera[camera_id]
-
     filepath = os.path.join(detection_dir, file)
+    with open(filepath, 'r') as f:
+        data = f.readlines()
+        sample = json.loads(data[0])
+        camera_id = str(int(sample['intersection']))
+
+    camera_name = id_to_camera[camera_id]
+    
     with open(filepath, 'r') as f:
         data = f.readlines()
         hours = []

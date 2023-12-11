@@ -85,7 +85,7 @@ for i, item in malfunction_df.iterrows():
         out_dict['occlusion'].append(False)
         out_dict['snapshot_file'].append(snapshot_file)
     for video in video_files:
-        
+        print(f"Reading: {video}")
         # extract information from file name
         filename = video.split('/')[-1]
         
