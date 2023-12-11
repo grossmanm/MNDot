@@ -16,9 +16,9 @@ traffic_data_dir = args.traffic_data_dir
 output_dir = args.output_dir
 
 if not traffic_data_dir:
-    traffic_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/traffic/singal_data/')
+    traffic_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data_sorted/')
 if not output_dir:
-    output_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/traffic/hourly/')
+    output_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data_hourly/')
 
 
 # file_name = 'sorted_ControllerLogs_Signal_1039_2022_6.csv'

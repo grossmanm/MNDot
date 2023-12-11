@@ -24,7 +24,7 @@ if not correlation_dir:
 if not output_dir:
     output_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/malfunctions/weather_correlation/')
 
-malfunction_files = [x for x in os.listdir(malfunction_dir) if x.startswith('output-detected') and x.endswith('seperateHours.json')]
+malfunction_files = [x for x in os.listdir(malfunction_dir) if x.startswith('output_detected') and x.endswith('seperateHours.json')]
 correlation_files = os.listdir(correlation_dir)
 
 id_to_camera = {'51':'65_81st_Vision_Stream1','1039':'694_eriver_nramp_vision','1041':'694_eriver_sramp_vision', '596':'47_85th_Iteris_Stream1','54':'65_41st_gridsmart','210':'51_crc2_iteris', 

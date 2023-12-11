@@ -24,7 +24,7 @@ hourly = 1
 if not weather_data_dir:
     weather_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/weather_data/means/')
 if not traffic_data_dir:
-    traffic_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/traffic/hourly/')
+    traffic_data_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/signal_data_hourly/')
 if not output_dir:
     output_dir = os.path.join(os.path.dirname(os.getcwd()), 'data/correlation_scores/')
 
@@ -96,7 +96,7 @@ nit_location_map = {'51':[45.1150,-93.241732], '1039':[45.069585,-93.278772], '1
 weather_station_tree = scp.KDTree(list(weather_location_map.values()))
 
 def analyze_data(file_name1):
-    id2street = {'51': '65_81st', '210': '51_crc2', '1039': '694_eriver_sramp', '1039': '694_eriver_nramp', '1041':'694_eriver_sramp','899':'77_cliff_eramp'}
+    id2street = {'51': '65_81st', '210': '51_crc2', '1039': '694_eriver_sramp', '1039': '694_eriver_nramp', '1041':'694_eriver_sramp','899':'77_cliff_eramp', '54':'65_41st', '596':'47_85th'}
 
     columns = ['VISIBLITY_m', 'HUMIDITY_m', 'PRECIP RATE_m', 'WIND SPEED_m','AIR TEMP_m', 
                'MIN TEMP_m', 'MAX TEMP_m', 'WET BULB TEMP_m','DEW POINT_m', 'SURFACE TEMP_m', 'SUBSURFACE TEMP_m']
