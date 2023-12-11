@@ -48,29 +48,38 @@ Ex) `cs-u-benjen_694_eriver_nramp_vision-20230115_075949-085948`
 If you're actuated signal data has already been ordered and is in the correct format you should run the following commands:
 `python 01-highrez-satistics.py --startdt=2022-12-01 00:00:00.000 --enddt=2023-02-01 00:00:00.000 --input_dir=data/signal_data_sorted/ --output_file=data/signal_data_stats/output-stat-51-2022Dec2023Jan.json --input_files= sorted_ControllerLogs_Signal_51_2022_12.csv sorted_ControllerLogs_Signal_51_2023_01.csv`
 
-This will generate time-series statstics about the actuated signal data. Next we will detect malfunctions with the following command:
+This will generate time-series statstics about the actuated signal data. 
 
-`python 02-highrez-localcorr.py --startdt=2023-01-01 00:00:00.000 --enddt=2023-01-08 00:00:00.000 --threshold=-0.6 --input_file=data/signal_data_stats/output-stat-51-2022Dec2023Jan.json --output_dir=data/signal_data_analysis/ --output_file_basename=output-detected`
+Next You will calculate local correlation scores and extract malfunctions. You should ensure that --stardt and --enddt are exacty 7 days apart:
+`python 02-highrez-localcorr.py --intersectionID=51, --stardt=2023-01-01 --enddt=2023-01-08 --threshold=-0.6 --input_file=data/signal_data_stats/output_stat_51_2022-12-01_2023-01-30.json --output_dir=data/signal_data_analysis/ --output_file_baseme=output_detected`
 
-Note: startdt and enddt should be a week apart 
-
-The output file containing malfunctions will be written to output_dir and have the filename [output_file_basename]-separateHours.json
+Several files will be output from this process, malfunctions are stored in file named `output_detected_{intersection id}_{start date}_{end_date}-separateHours.json`
 
 ### Weather Correlation
 We need to generate hourly traffic data and change the temporal resolution of the weather data to match. Run the following commands
 
-`python generate_traffic_daily_volume.py --traffic_data_dir=data/signal_data_sorted/ --output_dir=data/signal_data/hourly/`
+`python generate_traffic_daily_volume.py --traffic_data_dir=data/signal_data_sorted/ --output_dir=data/signal_data_hourly/`
 
-`python change_time_resolution.py --data_dir=data/weather_data/updated_schema/ --output_dir=data/weather_data/hourly/`
+`python calc_hourly_mean_std.py --data_dir=data/weather_data/updated_schema/ --output_dir=data/weather_data/hourly/`
 
 Next we will analyze the results of the previous step and generate correlation values for the weather variables at each timestep
 
-`python analyze_weather_and_signal.py --weather_data_file=data/weather_data/hourly/Little Canada_8_9_hourly.csv --traffic_data_dir=data/signal_data/hourly/ --output_dir=data/results/`
+`python analyze_weather_and_signal.py --weather_data_dir=data/weather_data/means/ --traffic_data_dir=data/signal_data_hourly/ --output_dir=data/correlation_scores/`
 
+Next we will calculate global correlation and extract globally correlated variables
 
-While we are doing this we should also generate mean and standard deviation values for the weather data. The results will be used later
+`python compute_global_correlation.py --correlation_dir=data/correlation_scores/ --known_correlation_file=data/weather_data/known_correlations.csv --output_dir=data/weather_data/global_variables/`
 
-`python calc_hourly_mean_std --source_dir=data/weather_data/updated_schema/ --output_dir=data/weather_data/means/`
+This will return a file with globally correlated variables for each month covered by the weather data
+
+Next we will calculate the highly correlated variables for each hour in our data. We will include mean and standard devations for each the highly correlated variables
+
+`python extract_correlated_weather_variables.py --correlation_data_dir=data/correlation_scores/ --mean_data_dir=data/weather_data/means/ --global_correlation_dir=data/weather_data/global_variables/ --output_dir=data/weather_data/extracted_scores/`
+
+Next we will associate the highly correlated variables with malfunctions detected in the Malfunction Detection section
+
+`python correlate_to_malfunciton.py --malfunction_dir=data/signal_data_analysis/ --correlation_dir=data/weather_data/extracted_scores/ --output_dir=data/malfunctions/weather_correlation/`
+
 
 ### Video Detection
 We read the malfunciton data and assign them id's 
