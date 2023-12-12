@@ -69,6 +69,12 @@ for i, item in malfunction_df.iterrows():
     # iterate over weather variables and check they exist in the detection technology sub-dictionary
     # if they don't intialize the counter to 0
     number_of_malfunctions[camera_type]+=1
+    if weather_variables == ['']:
+        weather_variables = []
+    if weather_means == ['']:
+        weather_means = []
+    if weather_stds == ['']:
+        weather_stds = []
     for j in range(len(weather_variables)):
         if weather_variables[j] not in out_dict[camera_type]:
             out_dict[camera_type][weather_variables[j]] = 0
@@ -131,8 +137,9 @@ for type in malfunction_means:
     read_dict = malfunction_means[type]
     for i in range(len(categories)):
         category = categories[i]
-        idx = all_means.index(category)
-        means[idx] = read_dict[category]
+        if category in read_dict:
+            means[i] = read_dict[category]
+
     all_means.append(means)
 
 all_stds = []
@@ -141,8 +148,8 @@ for type in malfunction_stds:
     read_dict = malfunction_stds[type]
     for i in range(len(categories)):
         category = categories[i]
-        idx = categories.index(category)
-        stds[idx] = read_dict[category]
+        if category in read_dict:
+            stds[i] = read_dict[category]
     all_stds.append(stds)
 
 bar_position_set = np.arange(len(categories))
@@ -153,7 +160,7 @@ for i in range(len(list(malfunction_means.keys()))):
     bar_position_set = bar_position_set+bar_width
 
 plt.xlabel('Weather Variables')
-plt.xticks(np.arange(len(means)), means, rotation=45)
+plt.xticks(np.arange(len(categories)), categories, rotation=45)
 plt.ylabel('Mean Value')
 plt.title("Mean Value of Weather Variables for each Detection Technology")
 plt.legend()

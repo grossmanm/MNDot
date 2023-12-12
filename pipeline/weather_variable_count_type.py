@@ -74,6 +74,12 @@ for i, item in malfunction_df.iterrows():
     # iterate over weather variables and check they exist in the malfunction_type sub-dictionary
     # if they don't intialize the counter to 0
     number_of_malfunctions[malfunction_type]+=1
+    if weather_variables == ['']:
+        weather_variables = []
+    if weather_means == ['']:
+        weather_means = []
+    if weather_stds == ['']:
+        weather_stds = []
     for j in range(len(weather_variables)):
         if weather_variables[j] not in out_dict[malfunction_type]:
             out_dict[malfunction_type][weather_variables[j]] = 0
@@ -137,9 +143,8 @@ for type in malfunction_means:
     modes = ['' for _ in range(len(categories))]
     read_dict = malfunction_means[type]
     for i in range(len(categories)):
-        category = categories[i]
-        idx = categories.index(category)
-        means[idx] = read_dict[category]
+        if categories[i] in read_dict:
+            means[i] = read_dict[categories[i]]
     all_means.append(means)
 
 all_stds = []
@@ -149,8 +154,8 @@ for type in malfunction_stds:
     read_dict = malfunction_stds[type]
     for i in range(len(categories)):
         category = categories[i]
-        idx = categories.index(category)
-        stds[idx] = read_dict[category]
+        if category in read_dict:
+            stds[i] = read_dict[category]
     all_stds.append(stds)
 
 bar_position_set = np.arange(len(categories))

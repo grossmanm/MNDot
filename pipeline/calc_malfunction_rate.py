@@ -59,9 +59,10 @@ for i, item in malfunction_df.iterrows():
     if date > max_date:
         max_date= date
 # create a new graph and table for each detection_technology
+out_graph+=f"_vision_iteris.png"
 for detection_technology in count_dict:
     out_file+=f"_{detection_technology}.csv"
-    out_graph+=f"_{detection_technology}.png"
+    
     malfunction_types = count_dict[detection_technology]
     out_dict = {'malfunction_type':[], 'date':[], 'malfunction_count':[]}
     # create a new plot for each malfunction
@@ -88,17 +89,17 @@ for detection_technology in count_dict:
             out_dict['malfunction_count'].append(y[i])
         # create plot
         random_rgb = (random.random(), random.random(), random.random())
-        plt.plot(x, y, label=malfunction_type, color=random_rgb)
+        plt.plot(x, y, label=malfunction_type+' '+detection_technology, color=random_rgb)
     
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(date_template))
-    plt.gcf().autofmt_xdate()
-    plt.xlabel('Date')
-    plt.ylim(0)
-    plt.ylabel('Malfunction Count')
-    plt.title(f"Malfunction Rates for {detection_technology}")
-    plt.legend()
-    plt.savefig(out_graph, dpi=300, bbox_inches='tight')
-    plt.clf()
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(date_template))
+plt.gcf().autofmt_xdate()
+plt.xlabel('Date')
+plt.ylim(0)
+plt.ylabel('Malfunction Count')
+plt.title(f"Malfunction Rates for Vision and Iteris")
+plt.legend()
+plt.savefig(out_graph, dpi=300, bbox_inches='tight')
+plt.clf()
 
-    out_df = pd.DataFrame(out_dict)
-    out_df.to_csv(out_file)
+out_df = pd.DataFrame(out_dict)
+out_df.to_csv(out_file)
