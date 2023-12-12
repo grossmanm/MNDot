@@ -96,3 +96,42 @@ Now we have a csv file with malfunctions and their associated files. Next we wil
 Now we assign a malfunction type based off of the detection
 
 `python assign_malfunction_type.py --occlusion_file=data/results/detected_occlusion.py --output_file=data/results/detected_malfunctions.csv`
+
+## Malfunction Analysis
+
+Here we create a malfunciton database and analyze the results of the previous three sections.
+
+To create the malfunction database run the follow line:
+
+`python create_malfunction_db.py --correlation_dir=data/weather_data/correlation/ --occlusion_detection_file=data/results/detected_malfunctions.csv --output_dir='data/results/`
+
+This will create a `malfunction_db.csv` file that we will use to create the analysis results
+
+We have created four files for analyzing the malfunction results and they are split as follows:
+
+1. We analyze the weather conditions surrounding specific types of malfunctions.
+`python weather_variable_count_type.py --malfunction_file=data/results/malfunction_db.csv --output_dir=data/results/`
+
+This process will output several files:
+    `malfunction_weather_type_correlation.json` contains the raw data used to generate the plots.
+    `malfunction_weather_type_correlation_rate.png` displays a comparison of the rate that different weather variables cause malfuncitons in NIT devices for different malfunction types
+    `malfunction_weather_type_correlation_mean.png` displays the mean and standard deviation of each of the weather variables that influence NIT malfunctions.
+
+2. We analyze the weather conditions surrounding malfunctions in specific camera types.
+`python weather_variable_count_detector.py --malfunction_file=data/results/malfunction_db.csv --output_dir=data/results/`
+
+This process will output several files:
+    `malfunction_weather_detector_correlation.json` contains the raw data used to generate the plots.
+    `malfunction_weather_detector_correlation_rate.png` displays a comparison of the rate that different weather variables cause malfunctions in each NIT device type.
+    `malfunction_weather_detector_correlation_mean.png` displays the mean and standard deviation of each of the weather variables that influence NIT malfunctions for each device type.
+
+3. We analyze the number of malfunctions that occur at each location
+`python malfunctions_per_location.py --malfunction_file=data/results/malfunction_db.csv --output_dir=data/results/`
+
+This process outputs a CSV file containing the counts of malfunctions of each type that occur at each location
+
+4. We analyze the rate of malfunctions over time for each detection technology
+
+`python calc_malfunction_rate.py --malfunction_file=data/results/malfunction_db.csv --output_dir=data/results/`
+
+This process outputs a CSV and a plot that describes the number of malfunctions experience per day by different detection technologies.
