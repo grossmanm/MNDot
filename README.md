@@ -1,6 +1,6 @@
 # MNDot
 Project Folder for MNDot Traffic Camera Project. The code is for evaluating the performance of NIT cameras in the Twin Cities Metropolitan area
-
+Authors: Malcolm Grossman, Haoji Hu, Yuankun Jaio
 Note: This project was built using python 3.10.12
 
 ## Before Running
