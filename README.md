@@ -127,11 +127,11 @@ This process will output several files:
 
 This process will output several files:
 
-    `malfunction_weather_detector_correlation.json` contains the raw data used to generate the plots.
+`malfunction_weather_detector_correlation.json` contains the raw data used to generate the plots.
     
-    `malfunction_weather_detector_correlation_rate.png` displays a comparison of the rate that different weather variables cause malfunctions in each NIT device type.
+`malfunction_weather_detector_correlation_rate.png` displays a comparison of the rate that different weather variables cause malfunctions in each NIT device type.
     
-    `malfunction_weather_detector_correlation_mean.png` displays the mean and standard deviation of each of the weather variables that influence NIT malfunctions for each device type.
+`malfunction_weather_detector_correlation_mean.png` displays the mean and standard deviation of each of the weather variables that influence NIT malfunctions for each device type.
 
 3. We analyze the number of malfunctions that occur at each location
 `python malfunctions_per_location.py --malfunction_file=data/results/malfunction_db.csv --output_dir=data/results/`
