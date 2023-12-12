@@ -31,7 +31,7 @@ for i, item in occlusion_df.iterrows():
     hour = item['hour']
     snapshot_file = item['snapshot_file']
     
-    malfunction_type = 'unknown'
+    malfunction_type = 'other'
 
     if occlusion_present:
         malfunction_type='occlusion'
