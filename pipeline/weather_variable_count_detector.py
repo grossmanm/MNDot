@@ -124,49 +124,92 @@ for i in range(len(list(out_dict.keys()))):
 plt.xlabel('Weather Variables')
 plt.xticks(np.arange(len(categories)), categories, rotation=45)
 plt.ylabel('Rate')
-plt.title("Correlation of Weather Variables and Detection Technology")
+plt.title("Rate of Weather Variables per Detection Technology")
 plt.legend()
 plt.tight_layout()
 plt.savefig(out_rate)
 plt.clf()
 
 # plot mean and standard deviations
-all_means = []
-for type in malfunction_means:
-    means = np.zeros(len(categories))
-    read_dict = malfunction_means[type]
-    for i in range(len(categories)):
-        category = categories[i]
-        if category in read_dict:
-            means[i] = read_dict[category]
+for category in categories:
+    if category == 'VISIBLITY':
+        unit = 'mi.'
+    elif category == 'HUMIDITY':
+        unit = '%'
+    elif category == 'PRECIPRATE':
+        unit = 'in/hr'
+    elif category == 'WINDSPEED':
+        unit = 'mph'
+    elif category == 'MAXTEMP':
+        unit = '\u00b0F'
+    elif category == 'MINTEMP':
+        unit = '\u00b0F'
+    elif category == 'WETBULBTEMP':
+        unit = '\u00b0F'
+    elif category == 'DEWPOINT':
+        unit = '\u00b0F'
+    elif category == 'SURFACETEMP':
+        unit = '\u00b0F'
+    elif category == 'SUBSURFACETEMP':
+        unit = '\u00b0F'
+    elif category == 'AIRTEMP':
+        unit = '\u00b0F'
+    all_means = []
+    all_stds = []
+    for type in malfunction_means:
+        m_read_dict = malfunction_means[type]
+        std_read_dict = malfunction_stds[type]
+        if category in m_read_dict:
+            all_means.append(m_read_dict[category])
+            all_stds.append(std_read_dict[category])
+        else:
+            all_means.append(0)
+            all_stds.append(0)
+    bar_position_set = np.arange(len(malfunction_means))
+    plt.bar(bar_position_set, all_means, yerr=all_stds, capsize=5, width=0.1, label=category, color='red')
+    plt.xlabel('Detection Technology')
+    plt.xticks(np.arange(len(malfunction_means)), malfunction_means, rotation=45)
+    plt.ylabel(f"Mean Value ({unit})")
+    plt.title(f"Mean value of {category} per Detection Technology")
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, f"mean_values_{category}_tech.jpg"))
+    plt.clf()
+# all_means = []
+# for type in malfunction_means:
+#     means = np.zeros(len(categories))
+#     read_dict = malfunction_means[type]
+#     for i in range(len(categories)):
+#         category = categories[i]
+#         if category in read_dict:
+#             means[i] = read_dict[category]
 
-    all_means.append(means)
+#     all_means.append(means)
 
-all_stds = []
-for type in malfunction_stds:
-    stds = np.zeros(len(categories))
-    read_dict = malfunction_stds[type]
-    for i in range(len(categories)):
-        category = categories[i]
-        if category in read_dict:
-            stds[i] = read_dict[category]
-    all_stds.append(stds)
+# # all_stds = []
+# # for type in malfunction_stds:
+# #     stds = np.zeros(len(categories))
+# #     read_dict = malfunction_stds[type]
+# #     for i in range(len(categories)):
+# #         category = categories[i]
+# #         if category in read_dict:
+# #             stds[i] = read_dict[category]
+# #     all_stds.append(stds)
 
-bar_position_set = np.arange(len(categories))
-for i in range(len(list(malfunction_means.keys()))):
-    malfunction_type = list(malfunction_means.keys())[i]
-    random_rgb = colors[i]
-    plt.bar(bar_position_set, all_means[i], yerr=all_stds[i], capsize=5, width=bar_width, label=malfunction_type, color=random_rgb)
-    bar_position_set = bar_position_set+bar_width
+# # bar_position_set = np.arange(len(categories))
+# # for i in range(len(list(malfunction_means.keys()))):
+# #     malfunction_type = list(malfunction_means.keys())[i]
+# #     random_rgb = colors[i]
+# #     plt.bar(bar_position_set, all_means[i], yerr=all_stds[i], capsize=5, width=bar_width, label=malfunction_type, color=random_rgb)
+# #     bar_position_set = bar_position_set+bar_width
 
-plt.xlabel('Weather Variables')
-plt.xticks(np.arange(len(categories)), categories, rotation=45)
-plt.ylabel('Mean Value')
-plt.title("Mean Value of Weather Variables for each Detection Technology")
-plt.legend()
-plt.tight_layout()
-plt.savefig(out_mean)
-plt.clf()
+# # plt.xlabel('Weather Variables')
+# # plt.xticks(np.arange(len(categories)), categories, rotation=45)
+# # plt.ylabel('Mean Value')
+# # plt.title("Mean Value of Weather Variables for each Detection Technology")
+# # plt.legend()
+# # plt.tight_layout()
+# # plt.savefig(out_mean)
+# # plt.clf()
 
 with open(out_file, 'w') as f:
     json.dump(out_dict, f)

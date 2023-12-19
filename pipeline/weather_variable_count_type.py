@@ -36,8 +36,7 @@ if not output_dir:
 
 out_file = os.path.join(output_dir, 'malfunction_weather_type_correlation.json')
 out_rate = os.path.join(output_dir, 'malfunction_weather_type_correlation_rate.png')
-out_mean = os.path.join(output_dir, 'malfunction_weather_type_correlation_mean.png')
-out_mode = os.path.join(output_dir, 'malfunction_weather_type_correlation_mode')
+#out_mean = os.path.join(output_dir, 'malfunction_weather_type_correlation_mean.png')
 
 malfunction_df = pd.read_csv(malfunction_file)
 
@@ -130,49 +129,59 @@ for i in range(len(list(out_dict.keys()))):
 plt.xlabel('Weather Variables')
 plt.xticks(np.arange(len(categories)), categories, rotation=45)
 plt.ylabel('Rate')
-plt.title("Correlation of Weather Variables and Malfunction Type")
+plt.title("Rate of Weather Variables per Malfunction type")
 plt.legend()
 plt.tight_layout()
 plt.savefig(out_rate)
 plt.clf()
 
 # plot mean and standard deviations
-all_means = []
-for type in malfunction_means:
-    means = np.zeros(len(categories))
-    modes = ['' for _ in range(len(categories))]
-    read_dict = malfunction_means[type]
-    for i in range(len(categories)):
-        if categories[i] in read_dict:
-            means[i] = read_dict[categories[i]]
-    all_means.append(means)
 
-all_stds = []
-for type in malfunction_stds:
-    stds = np.zeros(len(categories))
-    freqs = ['' for _ in range(len(categories))]
-    read_dict = malfunction_stds[type]
-    for i in range(len(categories)):
-        category = categories[i]
-        if category in read_dict:
-            stds[i] = read_dict[category]
-    all_stds.append(stds)
-
-bar_position_set = np.arange(len(categories))
-for i in range(len(list(malfunction_means.keys()))):
-    malfunction_type = list(malfunction_means.keys())[i]
-    random_rgb = colors[i]
-    plt.bar(bar_position_set, all_means[i], yerr=all_stds[i], capsize=5, width=bar_width, label=malfunction_type, color=random_rgb)
-    bar_position_set = bar_position_set+bar_width
-
-plt.xlabel('Weather Variables')
-plt.xticks(np.arange(len(categories)), categories, rotation=45)
-plt.ylabel('Mean Value')
-plt.title("Mean Value of Weather Variables for Malfunction Types")
-plt.legend()
-plt.tight_layout()
-plt.savefig(out_mean)
-plt.clf()
+for category in categories:
+    if category == 'VISIBLITY':
+        unit = 'mi.'
+    elif category == 'HUMIDITY':
+        unit = '%'
+    elif category == 'PRECIPRATE':
+        unit = 'in/hr'
+    elif category == 'WINDSPEED':
+        unit = 'mph'
+    elif category == 'MAXTEMP':
+        unit = '\u00b0F'
+    elif category == 'MINTEMP':
+        unit = '\u00b0F'
+    elif category == 'WETBULBTEMP':
+        unit = '\u00b0F'
+    elif category == 'DEWPOINT':
+        unit = '\u00b0F'
+    elif category == 'SURFACETEMP':
+        unit = '\u00b0F'
+    elif category == 'SUBSURFACETEMP':
+        unit = '\u00b0F'
+    elif category == 'AIRTEMP':
+        unit = '\u00b0F'
+    all_means = []
+    all_stds = []
+    for type in malfunction_means:
+        m_read_dict = malfunction_means[type]
+        std_read_dict = malfunction_stds[type]
+        if category in m_read_dict:
+            all_means.append(m_read_dict[category])
+            all_stds.append(std_read_dict[category])
+        else:
+            all_means.append(0)
+            all_stds.append(0)
+    if category == 'VISIBLTY':
+        category == 'VISIBLITY'
+    bar_position_set = np.arange(len(malfunction_means))
+    plt.bar(bar_position_set, all_means, yerr=all_stds, capsize=5, width=0.1, label=category, color='red')
+    plt.xlabel('Malfunction Type')
+    plt.xticks(np.arange(len(malfunction_means)), malfunction_means, rotation=45)
+    plt.ylabel(f'Mean Value ({unit})')
+    plt.title(f"Mean value of {category} per malfunction type")
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, f"mean_values_{category}_type.jpg"))
+    plt.clf()
 
 with open(out_file, 'w') as f:
     json.dump(out_dict, f)
